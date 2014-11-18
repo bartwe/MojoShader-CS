@@ -409,21 +409,359 @@ public class MojoShader
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void MOJOSHADER_freeParseData(IntPtr data);
 
+	/* IntPtr refers to a MOJOSHADER_preshader*, d to a void* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern IntPtr MOJOSHADER_parsePreshader(
+		byte[] buf,
+		uint len,
+		MOJOSHADER_malloc m,
+		MOJOSHADER_free f,
+		IntPtr d
+	);
+
+	/* preshader refers to a MOJOSHADER_preshader* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern void MOJOSHADER_freePreshader(IntPtr preshader);
+
 	#endregion
 
 	#region Effects Interface
 
+	/* MOJOSHADER_effectState types... */
+
+	public enum MOJOSHADER_renderStateType
+	{
+		MOJOSHADER_RS_ZENABLE,
+		MOJOSHADER_RS_FILLMODE,
+		MOJOSHADER_RS_SHADEMODE,
+		MOJOSHADER_RS_ZWRITEENABLE,
+		MOJOSHADER_RS_ALPHATESTENABLE,
+		MOJOSHADER_RS_LASTPIXEL,
+		MOJOSHADER_RS_SRCBLEND,
+		MOJOSHADER_RS_DESTBLEND,
+		MOJOSHADER_RS_CULLMODE,
+		MOJOSHADER_RS_ZFUNC,
+		MOJOSHADER_RS_ALPHAREF,
+		MOJOSHADER_RS_ALPHAFUNC,
+		MOJOSHADER_RS_DITHERENABLE,
+		MOJOSHADER_RS_ALPHABLENDENABLE,
+		MOJOSHADER_RS_FOGENABLE,
+		MOJOSHADER_RS_SPECULARENABLE,
+		MOJOSHADER_RS_FOGCOLOR,
+		MOJOSHADER_RS_FOGTABLEMODE,
+		MOJOSHADER_RS_FOGSTART,
+		MOJOSHADER_RS_FOGEND,
+		MOJOSHADER_RS_FOGDENSITY,
+		MOJOSHADER_RS_RANGEFOGENABLE,
+		MOJOSHADER_RS_STENCILENABLE,
+		MOJOSHADER_RS_STENCILFAIL,
+		MOJOSHADER_RS_STENCILZFAIL,
+		MOJOSHADER_RS_STENCILPASS,
+		MOJOSHADER_RS_STENCILFUNC,
+		MOJOSHADER_RS_STENCILREF,
+		MOJOSHADER_RS_STENCILMASK,
+		MOJOSHADER_RS_STENCILWRITEMASK,
+		MOJOSHADER_RS_TEXTUREFACTOR,
+		MOJOSHADER_RS_WRAP0,
+		MOJOSHADER_RS_WRAP1,
+		MOJOSHADER_RS_WRAP2,
+		MOJOSHADER_RS_WRAP3,
+		MOJOSHADER_RS_WRAP4,
+		MOJOSHADER_RS_WRAP5,
+		MOJOSHADER_RS_WRAP6,
+		MOJOSHADER_RS_WRAP7,
+		MOJOSHADER_RS_WRAP8,
+		MOJOSHADER_RS_WRAP9,
+		MOJOSHADER_RS_WRAP10,
+		MOJOSHADER_RS_WRAP11,
+		MOJOSHADER_RS_WRAP12,
+		MOJOSHADER_RS_WRAP13,
+		MOJOSHADER_RS_WRAP14,
+		MOJOSHADER_RS_WRAP15,
+		MOJOSHADER_RS_CLIPPING,
+		MOJOSHADER_RS_LIGHTING,
+		MOJOSHADER_RS_AMBIENT,
+		MOJOSHADER_RS_FOGVERTEXMODE,
+		MOJOSHADER_RS_COLORVERTEX,
+		MOJOSHADER_RS_LOCALVIEWER,
+		MOJOSHADER_RS_NORMALIZENORMALS,
+		MOJOSHADER_RS_DIFFUSEMATERIALSOURCE,
+		MOJOSHADER_RS_SPECULARMATERIALSOURCE,
+		MOJOSHADER_RS_AMBIENTMATERIALSOURCE,
+		MOJOSHADER_RS_EMISSIVEMATERIALSOURCE,
+		MOJOSHADER_RS_VERTEXBLEND,
+		MOJOSHADER_RS_CLIPPLANEENABLE,
+		MOJOSHADER_RS_POINTSIZE,
+		MOJOSHADER_RS_POINTSIZE_MIN,
+		MOJOSHADER_RS_POINTSPRITEENABLE,
+		MOJOSHADER_RS_POINTSCALEENABLE,
+		MOJOSHADER_RS_POINTSCALE_A,
+		MOJOSHADER_RS_POINTSCALE_B,
+		MOJOSHADER_RS_POINTSCALE_C,
+		MOJOSHADER_RS_MULTISAMPLEANTIALIAS,
+		MOJOSHADER_RS_MULTISAMPLEMASK,
+		MOJOSHADER_RS_PATCHEDGESTYLE,
+		MOJOSHADER_RS_DEBUGMONITORTOKEN,
+		MOJOSHADER_RS_POINTSIZE_MAX,
+		MOJOSHADER_RS_INDEXEDVERTEXBLENDENABLE,
+		MOJOSHADER_RS_COLORWRITEENABLE,
+		MOJOSHADER_RS_TWEENFACTOR,
+		MOJOSHADER_RS_BLENDOP,
+		MOJOSHADER_RS_POSITIONDEGREE,
+		MOJOSHADER_RS_NORMALDEGREE,
+		MOJOSHADER_RS_SCISSORTESTENABLE,
+		MOJOSHADER_RS_SLOPESCALEDEPTHBIAS,
+		MOJOSHADER_RS_ANTIALIASEDLINEENABLE,
+		MOJOSHADER_RS_MINTESSELLATIONLEVEL,
+		MOJOSHADER_RS_MAXTESSELLATIONLEVEL,
+		MOJOSHADER_RS_ADAPTIVETESS_X,
+		MOJOSHADER_RS_ADAPTIVETESS_Y,
+		MOJOSHADER_RS_ADAPTIVETESS_Z,
+		MOJOSHADER_RS_ADAPTIVETESS_W,
+		MOJOSHADER_RS_ENABLEADAPTIVETESSELLATION,
+		MOJOSHADER_RS_TWOSIDEDSTENCILMODE,
+		MOJOSHADER_RS_CCW_STENCILFAIL,
+		MOJOSHADER_RS_CCW_STENCILZFAIL,
+		MOJOSHADER_RS_CCW_STENCILPASS,
+		MOJOSHADER_RS_CCW_STENCILFUNC,
+		MOJOSHADER_RS_COLORWRITEENABLE1,
+		MOJOSHADER_RS_COLORWRITEENABLE2,
+		MOJOSHADER_RS_COLORWRITEENABLE3,
+		MOJOSHADER_RS_BLENDFACTOR,
+		MOJOSHADER_RS_SRGBWRITEENABLE,
+		MOJOSHADER_RS_DEPTHBIAS,
+		MOJOSHADER_RS_SEPARATEALPHABLENDENABLE,
+		MOJOSHADER_RS_SRCBLENDALPHA,
+		MOJOSHADER_RS_DESTBLENDALPHA,
+		MOJOSHADER_RS_BLENDOPALPHA,
+		MOJOSHADER_RS_VERTEXSHADER = 146,
+		MOJOSHADER_RS_PIXELSHADER = 147
+	}
+
+	public enum MOJOSHADER_zBufferType
+	{
+		MOJOSHADER_ZB_FALSE,
+		MOJOSHADER_ZB_TRUE,
+		MOJOSHADER_ZB_USEW
+	}
+
+	public enum MOJOSHADER_fillMode
+	{
+		MOJOSHADER_FILL_POINT		= 1,
+		MOJOSHADER_FILL_WIREFRAME	= 2,
+		MOJOSHADER_FILL_SOLID		= 3
+	}
+
+	public enum MOJOSHADER_shadeMode
+	{
+		MOJOSHADER_SHADE_FLAT		= 1,
+		MOJOSHADER_SHADE_GOURAUD	= 2,
+		MOJOSHADER_SHADE_PHONG		= 3,
+	}
+
+	public enum MOJOSHADER_blendMode
+	{
+		MOJOSHADER_BLEND_ZERO			= 1,
+		MOJOSHADER_BLEND_ONE			= 2,
+		MOJOSHADER_BLEND_SRCCOLOR		= 3,
+		MOJOSHADER_BLEND_INVSRCCOLOR		= 4,
+		MOJOSHADER_BLEND_SRCALPHA		= 5,
+		MOJOSHADER_BLEND_INVSRCALPHA		= 6,
+		MOJOSHADER_BLEND_DESTALPHA		= 7,
+		MOJOSHADER_BLEND_INVDESTALPHA		= 8,
+		MOJOSHADER_BLEND_DESTCOLOR		= 9,
+		MOJOSHADER_BLEND_INVDESTCOLOR		= 10,
+		MOJOSHADER_BLEND_SRCALPHASAT		= 11,
+		MOJOSHADER_BLEND_BOTHSRCALPHA		= 12,
+		MOJOSHADER_BLEND_BOTHINVSRCALPHA	= 13,
+		MOJOSHADER_BLEND_BLENDFACTOR		= 14,
+		MOJOSHADER_BLEND_INVBLENDFACTOR		= 15,
+		MOJOSHADER_BLEND_SRCCOLOR2		= 16,
+		MOJOSHADER_BLEND_INVSRCCOLOR2		= 17
+	}
+
+	public enum MOJOSHADER_cullMode
+	{
+		MOJOSHADER_CULL_NONE	= 1,
+		MOJOSHADER_CULL_CW	= 2,
+		MOJOSHADER_CULL_CCW	= 3
+	}
+
+	public enum MOJOSHADER_compareFunc
+	{
+		MOJOSHADER_CMP_NEVER		= 1,
+		MOJOSHADER_CMP_LESS		= 2,
+		MOJOSHADER_CMP_EQUAL		= 3,
+		MOJOSHADER_CMP_LESSEQUAL	= 4,
+		MOJOSHADER_CMP_GREATER		= 5,
+		MOJOSHADER_CMP_NOTEQUAL		= 6,
+		MOJOSHADER_CMP_GREATEREQUAL	= 7,
+		MOJOSHADER_CMP_ALWAYS		= 8
+	}
+
+	public enum MOJOSHADER_fogMode
+	{
+		MOJOSHADER_FOG_NONE,
+		MOJOSHADER_FOG_EXP,
+		MOJOSHADER_FOG_EXP2,
+		MOJOSHADER_FOG_LINEAR
+	}
+
+	public enum MOJOSHADER_stencilOp
+	{
+		MOJOSHADER_STENCILOP_KEEP	= 1,
+		MOJOSHADER_STENCILOP_ZERO	= 2,
+		MOJOSHADER_STENCILOP_REPLACE	= 3,
+		MOJOSHADER_STENCILOP_INCRSAT	= 4,
+		MOJOSHADER_STENCILOP_DECRSAT	= 5,
+		MOJOSHADER_STENCILOP_INVERT	= 6,
+		MOJOSHADER_STENCILOP_INCR	= 7,
+		MOJOSHADER_STENCILOP_DECR	= 8
+	}
+
+	public enum MOJOSHADER_materialColorSource
+	{
+		MOJOSHADER_MCS_MATERIAL,
+		MOJOSHADER_MCS_COLOR1,
+		MOJOSHADER_MCS_COLOR2
+	}
+
+	public enum MOJOSHADER_vertexBlendFlags
+	{
+		MOJOSHADER_VBF_DISABLE	= 0,
+		MOJOSHADER_VBF_1WEIGHTS	= 1,
+		MOJOSHADER_VBF_2WEIGHTS	= 2,
+		MOJOSHADER_VBF_3WEIGHTS	= 3,
+		MOJOSHADER_VBF_TWEENING	= 255,
+		MOJOSHADER_VBF_0WEIGHTS	= 256,
+	}
+
+	public enum MOJOSHADER_patchedEdgeStyle
+	{
+		MOJOSHADER_PATCHEDGE_DISCRETE,
+		MOJOSHADER_PATCHEDGE_CONTINUOUS
+	}
+
+	public enum MOJOSHADER_debugMonitorTokens
+	{
+		MOJOSHADER_DMT_ENABLE,
+		MOJOSHADER_DMT_DISABLE
+	}
+
+	public enum MOJOSHADER_blendOp
+	{
+		MOJOSHADER_BLENDOP_ADD		= 1,
+		MOJOSHADER_BLENDOP_SUBTRACT	= 2,
+		MOJOSHADER_BLENDOP_REVSUBTRACT	= 3,
+		MOJOSHADER_BLENDOP_MIN		= 4,
+		MOJOSHADER_BLENDOP_MAX		= 5
+	}
+
+	public enum MOJOSHADER_degreeType
+	{
+		MOJOSHADER_DEGREE_LINEAR	= 1,
+		MOJOSHADER_DEGREE_QUADRATIC	= 2,
+		MOJOSHADER_DEGREE_CUBIC		= 3,
+		MOJOSHADER_DEGREE_QUINTIC	= 5
+	}
+
+	/* MOJOSHADER_effectSamplerState types... */
+
+	public enum MOJOSHADER_samplerStateType
+	{
+		MOJOSHADER_SAMP_UNKNOWN0	= 0,
+		MOJOSHADER_SAMP_UNKNOWN1	= 1,
+		MOJOSHADER_SAMP_UNKNOWN2	= 2,
+		MOJOSHADER_SAMP_UNKNOWN3	= 3,
+		MOJOSHADER_SAMP_TEXTURE		= 4,
+		MOJOSHADER_SAMP_ADDRESSU	= 5,
+		MOJOSHADER_SAMP_ADDRESSV	= 6,
+		MOJOSHADER_SAMP_ADDRESSW	= 7,
+		MOJOSHADER_SAMP_BORDERCOLOR	= 8,
+		MOJOSHADER_SAMP_MAGFILTER	= 9,
+		MOJOSHADER_SAMP_MINFILTER	= 10,
+		MOJOSHADER_SAMP_MIPFILTER	= 11,
+		MOJOSHADER_SAMP_MIPMAPLODBIAS	= 12,
+		MOJOSHADER_SAMP_MAXMIPLEVEL	= 13,
+		MOJOSHADER_SAMP_MAXANISOTROPY	= 14,
+		MOJOSHADER_SAMP_SRGBTEXTURE	= 15,
+		MOJOSHADER_SAMP_ELEMENTINDEX	= 16,
+		MOJOSHADER_SAMP_DMAPOFFSET	= 17
+	}
+
+	public enum MOJOSHADER_textureAddress
+	{
+		MOJOSHADER_TADDRESS_WRAP	= 1,
+		MOJOSHADER_TADDRESS_MIRROR	= 2,
+		MOJOSHADER_TADDRESS_CLAMP	= 3,
+		MOJOSHADER_TADDRESS_BORDER	= 4,
+		MOJOSHADER_TADDRESS_MIRRORONCE	= 5
+	}
+
+	public enum MOJOSHADER_textureFilterType
+	{
+		MOJOSHADER_TEXTUREFILTER_NONE,
+		MOJOSHADER_TEXTUREFILTER_POINT,
+		MOJOSHADER_TEXTUREFILTER_LINEAR,
+		MOJOSHADER_TEXTUREFILTER_ANISOTROPIC,
+		MOJOSHADER_TEXTUREFILTER_PYRAMIDALQUAD,
+		MOJOSHADER_TEXTUREFILTER_GAUSSIANQUAD,
+		MOJOSHADER_TEXTUREFILTER_CONVOLUTIONMONO
+	}
+
+	/* Effect value types... */
+
 	[StructLayout(LayoutKind.Sequential)]
-	public struct MOJOSHADER_effectParam
+	public struct MOJOSHADER_effectValue
 	{
 		public IntPtr name; // const char*
 		public IntPtr semantic; // const char*
+		public uint element_count;
+		public uint row_count;
+		public uint column_count;
+		public MOJOSHADER_symbolClass value_class;
+		public MOJOSHADER_symbolType value_type;
+		public uint value_count;
+		public IntPtr values; // You know what, just look at the C header...
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
 	public struct MOJOSHADER_effectState
 	{
-		public int type;
+		public MOJOSHADER_renderStateType type;
+		public MOJOSHADER_effectValue value;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct MOJOSHADER_effectSamplerState
+	{
+		public MOJOSHADER_samplerStateType type;
+		public MOJOSHADER_effectValue value;
+	}
+
+	/* typedef MOJOSHADER_effectValue MOJOSHADER_effectAnnotation; */
+	[StructLayout(LayoutKind.Sequential)]
+	public struct MOJOSHADER_effectAnnotation
+	{
+		public IntPtr name; // const char*
+		public IntPtr semantic; // const char*
+		public uint element_count;
+		public uint row_count;
+		public uint column_count;
+		public MOJOSHADER_symbolClass value_class;
+		public MOJOSHADER_symbolType value_type;
+		public uint value_count;
+		public IntPtr values; // You know what, just look at the C header...
+	}
+
+	/* Effect interface structures... */
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct MOJOSHADER_effectParam
+	{
+		public MOJOSHADER_effectValue value;
+		public uint annotation_count;
+		public IntPtr annotations; // MOJOSHADER_effectAnnotations*
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
@@ -432,6 +770,8 @@ public class MojoShader
 		public IntPtr name; // const char*
 		public uint state_count;
 		public IntPtr states; // MOJOSHADER_effectState*
+		public uint annotation_count;
+		public IntPtr annotations; // MOJOSHADER_effectAnnotations*
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
@@ -440,22 +780,84 @@ public class MojoShader
 		public IntPtr name; // const char*
 		public uint pass_count;
 		public IntPtr passes; // MOJOSHADER_effectPass*
+		public uint annotation_count;
+		public IntPtr annotations; // MOJOSHADER_effectAnnotations*
+	}
+
+	/* Effect "objects"... */
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct MOJOSHADER_effectShader
+	{
+		public MOJOSHADER_symbolType type;
+		public uint technique;
+		public uint pass;
+		public uint is_preshader;
+		public uint preshader_param_count;
+		public IntPtr preshader_params; // unsigned int*
+		public uint param_count;
+		public IntPtr parameters; // unsigned int*
+		public uint sampler_count;
+		public IntPtr samplers; // MOJOSHADER_samplerStateRegister*
+		public IntPtr shader; // *shader/*preshader union
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct MOJOSHADER_effectSamplerMap
+	{
+		public MOJOSHADER_symbolType type;
+		public IntPtr name; // const char*
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct MOJOSHADER_effectString
+	{
+		public MOJOSHADER_symbolType type;
+		public IntPtr stringvalue; // const char*
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
 	public struct MOJOSHADER_effectTexture
 	{
-		public uint param;
-		public IntPtr name; // const char*
+		public MOJOSHADER_symbolType type;
+		public uint tex_register;
+	}
+
+	[StructLayout(LayoutKind.Explicit)]
+	public struct MOJOSHADER_effectObject
+	{
+		[FieldOffset(0)]
+		public MOJOSHADER_symbolType type;
+		[FieldOffset(0)]
+		public MOJOSHADER_effectShader shader;
+		[FieldOffset(0)]
+		public MOJOSHADER_effectSamplerMap mapping;
+		[FieldOffset(0)]
+		public MOJOSHADER_effectString stringvalue;
+		[FieldOffset(0)]
+		public MOJOSHADER_effectTexture texture;
+	}
+
+	/* Effect state change types... */
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct MOJOSHADER_samplerStateRegister
+	{
+		public uint sampler_register;
+		public uint sampler_state_count;
+		public IntPtr sampler_states; // const MOJOSHADER_effectSamplerState*
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	public struct MOJOSHADER_effectShader
+	public struct MOJOSHADER_effectStateChanges
 	{
-		public uint technique;
-		public uint pass;
-		public IntPtr shader; // const MOJOSHADER_parseData*
+		public uint render_state_change_count;
+		public IntPtr render_state_changes; // const MOJOSHADER_effectState*
+		public uint sampler_state_change_count;
+		public IntPtr sampler_state_changes; // const MOJOSHADER_samplerStateRegister*
 	}
+
+	/* Effect parsing interface... */
 
 	[StructLayout(LayoutKind.Sequential)]
 	public struct MOJOSHADER_effect
@@ -467,10 +869,12 @@ public class MojoShader
 		public IntPtr parameters; // MOJOSHADER_effectParam* params, lolC#
 		public int technique_count;
 		public IntPtr techniques; // MOJOSHADER_effectTechnique*
-		public int texture_count;
-		public IntPtr textures; // MOJOSHADER_effectTextures*
-		public int shader_count;
-		public IntPtr shaders; // MOJOSHADER_effectShader*
+		public IntPtr current_technique; // const MOJOSHADER_effectTechnique*
+		public int current_pass;
+		public int object_count;
+		public IntPtr objects; // MOJOSHADER_effectObject*
+		public int restore_render_state;
+		public IntPtr state_changes; // MOJOSHADER_effectStateChanges*
 		public MOJOSHADER_malloc m;
 		public MOJOSHADER_free f;
 		public IntPtr malloc_data; // void*
@@ -495,6 +899,90 @@ public class MojoShader
 	/* effect refers to a MOJOSHADER_effect* */
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void MOJOSHADER_freeEffect(IntPtr effect);
+
+	/* Effect parameter interface... */
+
+	/* parameter refers to a MOJOSHADER_effectParam*, data to a void* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern void MOJOSHADER_effectSetRawValueHandle(
+		IntPtr parameter,
+		IntPtr data,
+		uint offset,
+		uint len
+	);
+
+	/* effect refers to a MOJOSHADER_effect*, data to a void* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern void MOJOSHADER_effectSetRawValueName(
+		IntPtr effect,
+		[MarshalAs(UnmanagedType.LPStr)]
+			string name,
+		IntPtr data,
+		uint offset,
+		uint len
+	);
+
+	/* Effect technique interface... */
+
+	/* IntPtr refers to a MOJOSHADER_effectTechnique*, effect to a MOJOSHADER_effect* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern IntPtr MOJOSHADER_effectGetCurrentTechnique(
+		IntPtr effect
+	);
+
+	/* effect refers to a MOJOSHADER_effect*, technique to a MOJOSHADER_effectTechnique* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern void MOJOSHADER_effectSetTechnique(
+		IntPtr effect,
+		IntPtr technique
+	);
+
+	/* IntPtr/technique refer to a MOJOSHADER_effectTechnique, effect to a MOJOSHADER_effect* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern IntPtr MOJOSHADER_effectFindNextValidTechnique(
+		IntPtr effect,
+		IntPtr technique
+	);
+
+	/* OpenGL effect interface... */
+
+	/* IntPtr refers to a MOJOSHADER_glEffect*, effect to a MOJOSHADER_effect* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern IntPtr MOJOSHADER_glCompileEffect(IntPtr effect);
+
+	/* glEffect refers to a MOJOSHADER_glEffect* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern void MOJOSHADER_glDeleteEffect(IntPtr glEffect);
+
+	/* glEffect refers to a MOJOSHADER_glEffect* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern void MOJOSHADER_glEffectBegin(
+		IntPtr glEffect,
+		out uint numPasses,
+		int saveShaderState,
+		ref MOJOSHADER_effectStateChanges stateChanges
+	);
+
+	/* glEffect refers to a MOJOSHADER_glEffect* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern void MOJOSHADER_glEffectBeginPass(
+		IntPtr glEffect,
+		uint pass
+	);
+
+	/* glEffect refers to a MOJOSHADER_glEffect* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern void MOJOSHADER_glEffectCommitChanges(
+		IntPtr glEffect
+	);
+
+	/* glEffect refers to a MOJOSHADER_glEffect* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern void MOJOSHADER_glEffectEndPass(IntPtr glEffect);
+
+	/* glEffect refers to a MOJOSHADER_glEffect* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern void MOJOSHADER_glEffectEnd(IntPtr glEffect);
 
 	#endregion
 
@@ -769,44 +1257,11 @@ public class MojoShader
 		IntPtr ptr
 	);
 
-	// FIXME: Ryan still needs to merge my patch for this! -flibit
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void MOJOSHADER_glSetVertexAttribDivisor(
 		MOJOSHADER_usage usage,
 		int index,
 		uint divisor
-	);
-
-	/* data refers to a const float* */
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-	public static extern void MOJOSHADER_glSetVertexPreshaderUniformF(
-		uint idx,
-		IntPtr data,
-		uint vec4n
-	);
-
-	/* data refers to a float* */
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-	public static extern void MOJOSHADER_glGetVertexPreshaderUniformF(
-		uint idx,
-		IntPtr data,
-		uint vec4n
-	);
-
-	/* data refers to a const float* */
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-	public static extern void MOJOSHADER_glSetPixelPreshaderUniformF(
-		uint idx,
-		IntPtr data,
-		uint vec4n
-	);
-
-	/* data refers to a float* */
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-	public static extern void MOJOSHADER_glGetPixelPreshaderUniformF(
-		uint idx,
-		IntPtr data,
-		uint vec4n
 	);
 
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
