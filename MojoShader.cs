@@ -1267,6 +1267,9 @@ public class MojoShader
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void MOJOSHADER_glProgramReady();
 
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern void MOJOSHADER_glProgramViewportFlip(int flip);
+
 	/* program refers to a MOJOSHADER_glProgram* */
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void MOJOSHADER_glDeleteProgram(IntPtr program);
