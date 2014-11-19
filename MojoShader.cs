@@ -1043,7 +1043,7 @@ public class MojoShader
 	);
 
 	/* lookup_d refers to a void*, malloc_d to a void* */
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(nativeLibName, EntryPoint = "MOJOSHADER_glBestProfile", CallingConvention = CallingConvention.Cdecl)]
 	private static extern IntPtr INTERNAL_glBestProfile(
 		MOJOSHADER_glGetProcAddress lookup,
 		IntPtr lookup_d,
@@ -1087,7 +1087,7 @@ public class MojoShader
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void MOJOSHADER_glMakeContextCurrent(IntPtr ctx);
 
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(nativeLibName, EntryPoint = "MOJOSHADER_glGetError", CallingConvention = CallingConvention.Cdecl)]
 	private static extern IntPtr INTERNAL_glGetError();
 	public static string MOJOSHADER_glGetError()
 	{
