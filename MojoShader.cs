@@ -369,8 +369,8 @@ public class MojoShader
 		public int symbol_count;
 		public IntPtr symbols; // MOJOSHADER_symbols*
 		public IntPtr preshader; // MOJOSHADER_preshader*
-		public MOJOSHADER_malloc malloc;
-		public MOJOSHADER_free free;
+		public IntPtr malloc; // MOJOSHADER_malloc
+		public IntPtr free; // MOJOSHADER_free
 		public IntPtr malloc_data; // void*
 	}
 
@@ -875,8 +875,8 @@ public class MojoShader
 		public IntPtr objects; // MOJOSHADER_effectObject*
 		public int restore_render_state;
 		public IntPtr state_changes; // MOJOSHADER_effectStateChanges*
-		public MOJOSHADER_malloc m;
-		public MOJOSHADER_free f;
+		public IntPtr m; // MOJOSHADER_malloc
+		public IntPtr f; // MOJOSHADER_free
 		public IntPtr malloc_data; // void*
 	}
 
