@@ -820,7 +820,6 @@ public class MojoShader
 	public struct MOJOSHADER_effectTexture
 	{
 		public MOJOSHADER_symbolType type;
-		public uint tex_register;
 	}
 
 	[StructLayout(LayoutKind.Explicit)]
