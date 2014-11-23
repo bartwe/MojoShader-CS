@@ -842,6 +842,7 @@ public class MojoShader
 	[StructLayout(LayoutKind.Sequential)]
 	public struct MOJOSHADER_samplerStateRegister
 	{
+		public IntPtr sampler_name; // const char*
 		public uint sampler_register;
 		public uint sampler_state_count;
 		public IntPtr sampler_states; // const MOJOSHADER_effectSamplerState*
