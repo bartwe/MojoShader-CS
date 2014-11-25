@@ -900,6 +900,10 @@ public class MojoShader
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void MOJOSHADER_freeEffect(IntPtr effect);
 
+	/* IntPtr/effect refer to a MOJOSHADER_effect* */
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern IntPtr MOJOSHADER_cloneEffect(IntPtr effect);
+
 	/* Effect parameter interface... */
 
 	/* parameter refers to a MOJOSHADER_effectParam*, data to a void* */
