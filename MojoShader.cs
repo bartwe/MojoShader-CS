@@ -325,10 +325,11 @@ public class MojoShader
 		public MOJOSHADER_preshaderOpcode opcode;
 		public uint element_count;
 		public uint operand_count;
-		// FIXME: public fixed MOJOSHADER_preshaderOperand operands[3];
+		// FIXME: public fixed MOJOSHADER_preshaderOperand operands[4];
 		public MOJOSHADER_preshaderOperand operand1;
 		public MOJOSHADER_preshaderOperand operand2;
 		public MOJOSHADER_preshaderOperand operand3;
+		public MOJOSHADER_preshaderOperand operand4;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
