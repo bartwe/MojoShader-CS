@@ -31,7 +31,7 @@ using System;
 using System.Runtime.InteropServices;
 #endregion
 
-public class MojoShader
+public static class MojoShader
 {
 	/* FIXME: Ask Ryan about sizeof(int) issues, particualrly for structs.
 	 * The places where this will be at its worst is LayoutKind.Explicit
