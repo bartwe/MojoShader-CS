@@ -856,6 +856,8 @@ public static class MojoShader
 		public IntPtr render_state_changes; // const MOJOSHADER_effectState*
 		public uint sampler_state_change_count;
 		public IntPtr sampler_state_changes; // const MOJOSHADER_samplerStateRegister*
+		public uint vertex_sampler_state_change_count;
+		public IntPtr vertex_sampler_state_changes; // const MOJOSHADER_samplerStateRegister*
 	}
 
 	/* Effect parsing interface... */
