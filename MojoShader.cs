@@ -1252,6 +1252,12 @@ public static class MojoShader
 		float loffset
 	);
 
+	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	public static extern int MOJOSHADER_glGetVertexAttribLocation(
+		MOJOSHADER_usage usage,
+		int index
+	);
+
 	/* ptr refers to a const void* */
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void MOJOSHADER_glSetVertexAttribute(
