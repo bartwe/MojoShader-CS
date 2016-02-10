@@ -742,11 +742,7 @@ public static class MojoShader
 	{
 		public IntPtr name; // const char*
 		public IntPtr semantic; // const char*
-		public uint element_count;
-		public uint row_count;
-		public uint column_count;
-		public MOJOSHADER_symbolClass value_class;
-		public MOJOSHADER_symbolType value_type;
+		public MOJOSHADER_symbolTypeInfo type;
 		public uint value_count;
 		public IntPtr values; // You know what, just look at the C header...
 	}
