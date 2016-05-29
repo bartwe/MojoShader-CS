@@ -356,6 +356,7 @@ public static class MojoShader
 		public MOJOSHADER_shaderType shader_type;
 		public int major_ver;
 		public int minor_ver;
+		public IntPtr mainfn; // const char*
 		public int uniform_count;
 		public IntPtr uniforms; // MOJOSHADER_uniform*
 		public int constant_count;
@@ -383,6 +384,7 @@ public static class MojoShader
 	public const string MOJOSHADER_PROFILE_NV2 =		"nv2";
 	public const string MOJOSHADER_PROFILE_NV3 =		"nv3";
 	public const string MOJOSHADER_PROFILE_NV4 =		"nv4";
+	public const string MOJOSHADER_PROFILE_METAL =		"metal";
 
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int MOJOSHADER_maxShaderModel(
@@ -395,6 +397,8 @@ public static class MojoShader
 	public static extern IntPtr MOJOSHADER_parse(
 		[MarshalAs(UnmanagedType.LPStr)]
 			string profile,
+		[MarshalAs(UnmanagedType.LPStr)]
+			string mainfn,
 		byte[] tokenbuf,
 		uint bufsize,
 		MOJOSHADER_swizzle[] swiz,
