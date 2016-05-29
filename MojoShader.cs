@@ -342,6 +342,11 @@ public static class MojoShader
 		public IntPtr symbols; // MOJOSHADER_symbol*
 		public uint instruction_count;
 		public IntPtr instructions; // MOJOSHADER_preshaderInstruction*
+		public uint register_count;
+		public IntPtr registers; // float*
+		public IntPtr malloc; // MOJOSHADER_malloc
+		public IntPtr free; // MOJOSHADER_free
+		public IntPtr malloc_data; // void*
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
