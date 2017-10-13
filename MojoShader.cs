@@ -33,13 +33,6 @@ using System.Runtime.InteropServices;
 
 public static class MojoShader
 {
-	/* FIXME: Ask Ryan about sizeof(int) issues, particualrly for structs.
-	 * The places where this will be at its worst is LayoutKind.Explicit
-	 * structures. The good news is that this only matters for Windows,
-	 * but still.
-	 * -flibit
-	 */
-
 	private const string nativeLibName = "MojoShader.dll";
 
 	#region Version Interface
@@ -388,6 +381,7 @@ public static class MojoShader
 	public const string MOJOSHADER_PROFILE_BYTECODE =	"bytecode";
 	public const string MOJOSHADER_PROFILE_GLSL =		"glsl";
 	public const string MOJOSHADER_PROFILE_GLSL120 =	"glsl120";
+	public const string MOJOSHADER_PROFILE_GLSLES =		"glsles";
 	public const string MOJOSHADER_PROFILE_ARB1 =		"arb1";
 	public const string MOJOSHADER_PROFILE_NV2 =		"nv2";
 	public const string MOJOSHADER_PROFILE_NV3 =		"nv3";
@@ -1041,12 +1035,15 @@ public static class MojoShader
 		IntPtr data
 	);
 
-	/* lookup_d refers to a void*, malloc_d to a void* */
+	/* lookup_d refers to a void*.
+	 * profs refers to a pre-allocated const char**.
+	 * malloc_d to a void*.
+	 */
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int MOJOSHADER_glAvailableProfiles(
 		MOJOSHADER_glGetProcAddress lookup,
 		IntPtr lookup_d,
-		IntPtr profs, // FIXME: const char**
+		IntPtr[] profs,
 		int size,
 		MOJOSHADER_malloc m,
 		MOJOSHADER_free f,
