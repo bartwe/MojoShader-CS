@@ -961,11 +961,11 @@ public static class MojoShader
 
 	/* glEffect refers to a MOJOSHADER_glEffect* */
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-	public static extern void MOJOSHADER_glEffectBegin(
+	public static extern unsafe void MOJOSHADER_glEffectBegin(
 		IntPtr glEffect,
 		out uint numPasses,
 		int saveShaderState,
-		ref MOJOSHADER_effectStateChanges stateChanges
+		MOJOSHADER_effectStateChanges* stateChanges
 	);
 
 	/* glEffect refers to a MOJOSHADER_glEffect* */
