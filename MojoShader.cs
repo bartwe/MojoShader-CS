@@ -847,6 +847,10 @@ public static class MojoShader
 		public IntPtr sampler_states; // const MOJOSHADER_effectSamplerState*
 	}
 
+	/* DO NOT USE STORE THIS STRUCT AS MANAGED MEMORY!
+	 * Instead, call malloc(sizeof(MOJOSHADER_effectStateChanges))
+	 * and send that to Begin().
+	 */
 	[StructLayout(LayoutKind.Sequential)]
 	public struct MOJOSHADER_effectStateChanges
 	{
@@ -965,7 +969,7 @@ public static class MojoShader
 		IntPtr glEffect,
 		out uint numPasses,
 		int saveShaderState,
-		ref MOJOSHADER_effectStateChanges stateChanges
+		IntPtr stateChanges
 	);
 
 	/* glEffect refers to a MOJOSHADER_glEffect* */
