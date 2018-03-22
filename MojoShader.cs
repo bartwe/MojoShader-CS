@@ -33,7 +33,68 @@ using System.Runtime.InteropServices;
 
 public static class MojoShader
 {
+	#region Native Library Name
+
 	private const string nativeLibName = "MojoShader.dll";
+
+	#endregion
+
+	#region UTF8 Marshaling
+
+	private static byte[] UTF8_ToNative(string s)
+	{
+		if (s == null)
+		{
+			return null;
+		}
+
+		// Add a null terminator. That's kind of it... :/
+		return System.Text.Encoding.UTF8.GetBytes(s + '\0');
+	}
+
+	private static unsafe string UTF8_ToManaged(IntPtr s)
+	{
+		if (s == IntPtr.Zero)
+		{
+			return null;
+		}
+
+		/* We get to do strlen ourselves! */
+		byte* ptr = (byte*) s;
+		while (*ptr != 0)
+		{
+			ptr++;
+		}
+
+		/* TODO: This #ifdef is only here because the equivalent
+		 * .NET 2.0 constructor appears to be less efficient?
+		 * Here's the pretty version, maybe steal this instead:
+		 *
+		string result = new string(
+			(sbyte*) s, // Also, why sbyte???
+			0,
+			(int) (ptr - (byte*) s),
+			System.Text.Encoding.UTF8
+		);
+		 * See the CoreCLR source for more info.
+		 * -flibit
+		 */
+#if NETSTANDARD2_0
+		/* Modern C# lets you just send the byte*, nice! */
+		string result = System.Text.Encoding.UTF8.GetString(
+			(byte*) s,
+			(int) (ptr - (byte*) s)
+		);
+#else
+		/* Old C# requires an extra memcpy, bleh! */
+		byte[] bytes = new byte[ptr - (byte*) s];
+		Marshal.Copy(s, bytes, 0, bytes.Length);
+		string result = System.Text.Encoding.UTF8.GetString(bytes);
+#endif
+		return result;
+	}
+
+	#endregion
 
 	#region Version Interface
 
@@ -389,18 +450,19 @@ public static class MojoShader
 	public const string MOJOSHADER_PROFILE_METAL =		"metal";
 
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-	public static extern int MOJOSHADER_maxShaderModel(
-		[MarshalAs(UnmanagedType.LPStr)]
-			string profile
+	private static extern int MOJOSHADER_maxShaderModel(
+		byte[] profile
 	);
+	public static int MOJOSHADER_maxShaderModel(string profile)
+	{
+		return MOJOSHADER_maxShaderModel(UTF8_ToNative(profile));
+	}
 
 	/* IntPtr refers to a MOJOSHADER_parseData*, d to a void* */
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-	public static extern IntPtr MOJOSHADER_parse(
-		[MarshalAs(UnmanagedType.LPStr)]
-			string profile,
-		[MarshalAs(UnmanagedType.LPStr)]
-			string mainfn,
+	private static extern IntPtr MOJOSHADER_parse(
+		byte[] profile,
+		byte[] mainfn,
 		byte[] tokenbuf,
 		uint bufsize,
 		MOJOSHADER_swizzle[] swiz,
@@ -411,6 +473,33 @@ public static class MojoShader
 		MOJOSHADER_free f,
 		IntPtr d
 	);
+	public static IntPtr MOJOSHADER_parse(
+		string profile,
+		string mainfn,
+		byte[] tokenbuf,
+		uint bufsize,
+		MOJOSHADER_swizzle[] swiz,
+		uint swizcount,
+		MOJOSHADER_samplerMap[] smap,
+		uint smapcount,
+		MOJOSHADER_malloc m,
+		MOJOSHADER_free f,
+		IntPtr d
+	) {
+		return MOJOSHADER_parse(
+			UTF8_ToNative(profile),
+			UTF8_ToNative(mainfn),
+			tokenbuf,
+			bufsize,
+			swiz,
+			swizcount,
+			smap,
+			smapcount,
+			m,
+			f,
+			d
+		);
+	}
 
 	/* data refers to a MOJOSHADER_parseData* */
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -887,9 +976,8 @@ public static class MojoShader
 
 	/* IntPtr refers to a MOJOSHADER_effect*, d to a void* */
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-	public static extern IntPtr MOJOSHADER_parseEffect(
-		[MarshalAs(UnmanagedType.LPStr)]
-			string profile,
+	private static extern IntPtr MOJOSHADER_parseEffect(
+		byte[] profile,
 		byte[] buf,
 		uint _len,
 		MOJOSHADER_swizzle[] swiz,
@@ -900,6 +988,31 @@ public static class MojoShader
 		MOJOSHADER_free f,
 		IntPtr d
 	);
+	public static IntPtr MOJOSHADER_parseEffect(
+		string profile,
+		byte[] buf,
+		uint _len,
+		MOJOSHADER_swizzle[] swiz,
+		uint swizcount,
+		MOJOSHADER_samplerMap[] smap,
+		uint smapcount,
+		MOJOSHADER_malloc m,
+		MOJOSHADER_free f,
+		IntPtr d
+	) {
+		return MOJOSHADER_parseEffect(
+			UTF8_ToNative(profile),
+			buf,
+			_len,
+			swiz,
+			swizcount,
+			smap,
+			smapcount,
+			m,
+			f,
+			d
+		);
+	}
 
 	/* effect refers to a MOJOSHADER_effect* */
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -922,14 +1035,28 @@ public static class MojoShader
 
 	/* effect refers to a MOJOSHADER_effect*, data to a void* */
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-	public static extern void MOJOSHADER_effectSetRawValueName(
+	private static extern void MOJOSHADER_effectSetRawValueName(
 		IntPtr effect,
-		[MarshalAs(UnmanagedType.LPStr)]
-			string name,
+		byte[] name,
 		IntPtr data,
 		uint offset,
 		uint len
 	);
+	public static void MOJOSHADER_effectSetRawValueName(
+		IntPtr effect,
+		string name,
+		IntPtr data,
+		uint offset,
+		uint len
+	) {
+		MOJOSHADER_effectSetRawValueName(
+			effect,
+			UTF8_ToNative(name),
+			data,
+			offset,
+			len
+		);
+	}
 
 	/* Effect technique interface... */
 
@@ -1034,8 +1161,7 @@ public static class MojoShader
 	#region OpenGL Interface
 
 	public delegate IntPtr MOJOSHADER_glGetProcAddress(
-		[MarshalAs(UnmanagedType.LPStr)]
-			string fnname,
+		IntPtr fnname,
 		IntPtr data
 	);
 
@@ -1070,7 +1196,7 @@ public static class MojoShader
 		MOJOSHADER_free f,
 		IntPtr malloc_d
 	) {
-		return Marshal.PtrToStringAnsi(
+		return UTF8_ToManaged(
 			INTERNAL_glBestProfile(
 				lookup,
 				lookup_d,
@@ -1085,15 +1211,31 @@ public static class MojoShader
 	 * lookup_d to a void*, malloc_d to a void*
 	 */
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-	public static extern IntPtr MOJOSHADER_glCreateContext(
-		[MarshalAs(UnmanagedType.LPStr)]
-			string profile,
+	private static extern IntPtr MOJOSHADER_glCreateContext(
+		byte[] profile,
 		MOJOSHADER_glGetProcAddress lookup,
 		IntPtr lookup_d,
 		MOJOSHADER_malloc m,
 		MOJOSHADER_free f,
 		IntPtr malloc_d
 	);
+	public static IntPtr MOJOSHADER_glCreateContext(
+		string profile,
+		MOJOSHADER_glGetProcAddress lookup,
+		IntPtr lookup_d,
+		MOJOSHADER_malloc m,
+		MOJOSHADER_free f,
+		IntPtr malloc_d
+	) {
+		return MOJOSHADER_glCreateContext(
+			UTF8_ToNative(profile),
+			lookup,
+			lookup_d,
+			m,
+			f,
+			malloc_d
+		);
+	}
 
 	/* ctx refers to a MOJOSHADER_glContext* */
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -1103,7 +1245,7 @@ public static class MojoShader
 	private static extern IntPtr INTERNAL_glGetError();
 	public static string MOJOSHADER_glGetError()
 	{
-		return Marshal.PtrToStringAnsi(INTERNAL_glGetError());
+		return UTF8_ToManaged(INTERNAL_glGetError());
 	}
 
 	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
